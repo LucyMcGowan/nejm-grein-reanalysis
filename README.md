@@ -137,7 +137,7 @@ ggsurvplot(survfit(Surv(time = t, event = event) ~ 1, data = dat),
 ![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 My curve doesn’t look exactly like the article’s so I probably need to
-do some more detective work 🕵️‍♂️.
+do some more detective work 🕵️‍♀️.
 
 ## Notes
 
