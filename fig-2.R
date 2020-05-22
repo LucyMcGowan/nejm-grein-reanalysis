@@ -11,6 +11,7 @@ cats <- tibble(
                levels = c("ECMO", "Mechanical ventilation", "NIPPV", 
                           "High-flow oxygen", "Low-flow oxygen", "Ambient air"))
 )
+
 long_dat %>%
   left_join(cats, by = "value") %>%
   filter(!is.na(value)) %>%
@@ -35,6 +36,5 @@ long_dat %>%
   scale_color_manual("Status", values = c("steelblue", "lightblue3", "gray30")) +
   guides(fill = guide_legend(override.aes = list(shape = NA), order = 1)) +
   coord_flip() +
-  labs(y = "day", x = "") +
+  labs(y = "Day", x = "") +
   theme_classic()
-
