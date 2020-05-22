@@ -137,7 +137,82 @@ ggsurvplot(survfit(Surv(time = t, event = event) ~ 1, data = dat),
 ![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 My curve doesn’t look exactly like the article’s so I probably need to
-do some more detective work 🕵️‍♀️.
+do some more detective work 🕵️‍♂️.
+
+I’ve painstakingly pulled every number from Figure 3A 😅
+
+``` r
+fig_3 <- tibble(
+  time = c(4, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 9,
+           10, 10, 10, 11, 11, 11, 11, 12, 12, 13,
+           13, 13, 13, 14, 14, 15, 15, 16, 16, 16, 
+           16, 16, 17, 17, 17, 18, 18, 20, 22, 22, 
+           23, 23, 23, 25, 26, 27, 28, 28, 29, 33),
+  event = c(1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0,
+            1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 
+            1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 
+            0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0,
+            0)
+)
+```
+
+``` r
+s <- survfit(Surv(time = time, event = event) ~ 1, data = fig_3)
+
+ggsurvplot(s, fun = "event", break.time.by = 4, ggtheme = theme_bw())
+```
+
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+I haven’t quite figured out how to map these back to Figure 2, but it
+seems it replicates Figure 3A pretty well. Let’s estimate the cumulative
+incidence at 28 days:
+
+``` r
+1-s$surv[s$time == 28]
+#> [1] 0.8499287
+```
+
+Looks very similar to the 84% reported in the initial paper.
+
+Okay, now let’s see what happens if we do this as a proper competing
+risk analysis. I’ve recoded the 7 deaths (guessed from Figure 2).
+
+``` r
+fig_3_fixed <- tibble(
+  time = c(4, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 9,
+           10, 10, 10, 11, 11, 11, 11, 12, 12, 13,
+           13, 13, 13, 14, 14, 15, 15, 16, 16, 16, 
+           16, 16, 17, 17, 17, 18, 18, 20, 22, 22, 
+           23, 23, 23, 25, 26, 27, 28, 28, 29, 33),
+  event = c(1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 2,
+            1, 1, 0, 1, 1, 2, 0, 1, 1, 1, 1, 1, 0, 
+            1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 
+            2, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0,
+            0)
+)
+```
+
+[Emily Zabor has an amazing tutorial on
+this](https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#cumulative_incidence_for_competing_risks)
+
+``` r
+library(cmprsk)
+#> Warning: package 'cmprsk' was built under R version 3.5.2
+
+x <- cuminc(fig_3_fixed$time, fig_3_fixed$event, cencode = 0)
+ggcompetingrisks(x, conf.int = TRUE,
+                 gnames = c("Improvement Improvement", "Death Death"))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+Ok, let’s pull the cumulative incidence now, taking death into account.
+
+``` r
+x$`1 1`$est[x$`1 1`$time == 28][2]
+#> [1] 0.7430043
+```
 
 ## Notes
 
