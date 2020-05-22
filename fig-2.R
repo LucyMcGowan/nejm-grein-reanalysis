@@ -18,6 +18,7 @@ long_dat %>%
          day_oxy = ifelse(day_oxy > 28, 28, day_oxy),
          day = ifelse(day > 28, 28, day),
          patient = factor(patient, levels = 53:1),
+         status = factor(status, labels = c("Improved", "Not Changed", "Worsened")),
          event = ifelse(event == "censor", NA, event)
   ) %>%
   ggplot(aes(x = patient, y = day_oxy, fill = cat)) +
