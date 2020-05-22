@@ -1,4 +1,5 @@
-library(tidyverse)
+library("tidyverse")
+
 d <- read_csv("data/data-fig-2.csv")
 
 long_dat <- d %>%
