@@ -1,4 +1,5 @@
-library(tidyverse)
+library("tidyverse")
+
 d <- read_csv("data/data-fig-2.csv")
 
 long_dat <- d %>%
@@ -11,6 +12,7 @@ cats <- tibble(
                levels = c("ECMO", "Mechanical ventilation", "NIPPV", 
                           "High-flow oxygen", "Low-flow oxygen", "Ambient air"))
 )
+
 long_dat %>%
   left_join(cats, by = "value") %>%
   filter(!is.na(value)) %>%
@@ -18,6 +20,7 @@ long_dat %>%
          day_oxy = ifelse(day_oxy > 28, 28, day_oxy),
          day = ifelse(day > 28, 28, day),
          patient = factor(patient, levels = 53:1),
+         status = factor(status, labels = c("Improved", "Not Changed", "Worsened")),
          event = ifelse(event == "censor", NA, event)
   ) %>%
   ggplot(aes(x = patient, y = day_oxy, fill = cat)) +
@@ -30,8 +33,9 @@ long_dat %>%
   geom_point(aes(x = patient, y = day - 0.5, shape = event)) +
   scale_shape_manual("Event", values = c(15, 5),
                      labels = c("Death", "Discharge", "")) +
+  geom_point(aes(x = patient, y = -2, color = status)) +
+  scale_color_manual("Status", values = c("steelblue", "lightblue3", "gray30")) +
   guides(fill = guide_legend(override.aes = list(shape = NA), order = 1)) +
   coord_flip() +
-  labs(y = "day", x = "") +
+  labs(y = "Day", x = "") +
   theme_classic()
-
