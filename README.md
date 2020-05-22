@@ -41,6 +41,7 @@ long_dat %>%
          day_oxy = ifelse(day_oxy > 28, 28, day_oxy),
          day = ifelse(day > 28, 28, day),
          patient = factor(patient, levels = 53:1),
+         status = factor(status, labels = c("Improved", "Not Changed", "Worsened")),
          event = ifelse(event == "censor", NA, event)
   ) %>%
   ggplot(aes(x = patient, y = day_oxy, fill = cat)) +
@@ -53,10 +54,16 @@ long_dat %>%
   geom_point(aes(x = patient, y = day - 0.5, shape = event)) +
   scale_shape_manual("Event", values = c(15, 5),
                      labels = c("Death", "Discharge", "")) +
+  geom_point(aes(x = patient, y = -2, color = status)) +
+  scale_color_manual("Status", values = c("steelblue", "lightblue3", "gray30")) +
+  scale_y_continuous(breaks = 0:28) +
   guides(fill = guide_legend(override.aes = list(shape = NA), order = 1)) +
   coord_flip() +
-  labs(y = "day", x = "") +
-  theme_classic()
+  labs(y = "Day", x = "Patient\nNo.") +
+  theme_classic() +
+  theme(axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_text(angle = 0))
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
@@ -137,7 +144,7 @@ ggsurvplot(survfit(Surv(time = t, event = event) ~ 1, data = dat),
 ![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 My curve doesn’t look exactly like the article’s so I probably need to
-do some more detective work 🕵️‍♂️.
+do some more detective work 🕵️‍♀️.
 
 I’ve painstakingly pulled every number from Figure 3A 😅
 
@@ -146,11 +153,11 @@ fig_3 <- tibble(
   time = c(4, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 9,
            10, 10, 10, 11, 11, 11, 11, 12, 12, 13,
            13, 13, 13, 14, 14, 15, 15, 16, 16, 16, 
-           16, 16, 17, 17, 17, 18, 18, 20, 22, 22, 
+           16, 17, 17, 17, 17, 18, 18, 20, 22, 22, 
            23, 23, 23, 25, 26, 27, 28, 28, 29, 33),
   event = c(1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0,
             1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 
-            1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 
+            1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 
             0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0,
             0)
 )
@@ -170,7 +177,7 @@ incidence at 28 days:
 
 ``` r
 1-s$surv[s$time == 28]
-#> [1] 0.8499287
+#> [1] 0.8405492
 ```
 
 Looks very similar to the 84% reported in the initial paper.
@@ -183,11 +190,11 @@ fig_3_fixed <- tibble(
   time = c(4, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 9,
            10, 10, 10, 11, 11, 11, 11, 12, 12, 13,
            13, 13, 13, 14, 14, 15, 15, 16, 16, 16, 
-           16, 16, 17, 17, 17, 18, 18, 20, 22, 22, 
+           16, 17, 17, 17, 17, 18, 18, 20, 22, 22, 
            23, 23, 23, 25, 26, 27, 28, 28, 29, 33),
   event = c(1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 2,
             1, 1, 0, 1, 1, 2, 0, 1, 1, 1, 1, 1, 0, 
-            1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 
+            1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 0, 2, 1, 
             2, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0,
             0)
 )
@@ -211,7 +218,7 @@ Ok, let’s pull the cumulative incidence now, taking death into account.
 
 ``` r
 x$`1 1`$est[x$`1 1`$time == 28][2]
-#> [1] 0.7430043
+#> [1] 0.734131
 ```
 
 ## Notes
