@@ -31,6 +31,8 @@ long_dat %>%
   geom_point(aes(x = patient, y = day - 0.5, shape = event)) +
   scale_shape_manual("Event", values = c(15, 5),
                      labels = c("Death", "Discharge", "")) +
+  geom_point(aes(x = patient, y = -2, color = status)) +
+  scale_color_manual("Status", values = c("steelblue", "lightblue3", "gray30")) +
   guides(fill = guide_legend(override.aes = list(shape = NA), order = 1)) +
   coord_flip() +
   labs(y = "day", x = "") +
